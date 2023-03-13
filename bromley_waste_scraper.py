@@ -4,29 +4,27 @@
    https://recyclingservices.bromley.gov.uk/waste/'''
 
 
-import requests, sys
+import argparse, requests, sys
 
 from bs4 import BeautifulSoup
 from requests.compat import urljoin
 
-
-if len(sys.argv) < 2:
-    print("Need 7 digit URL code argument")
-    sys.exit()
-
-URL_code = sys.argv[1]
-
-# Basic argument validation
-if not URL_code.isnumeric() or not len(URL_code) == 7:    #Bad code?
-    print("7 digit URL code argument is invalid.")
-    sys.exit()
-
+desc = '''Scrapes the data from the Bromley Recycling Services council website,
+ (https://recyclingservices.bromley.gov.uk/waste/), 
+ the location ID is taken from the URL after the address has been entered.'''
+parser = argparse.ArgumentParser(description=desc)
+parser.add_argument('location_ID')
+args = parser.parse_args()
 
 URL = "https://recyclingservices.bromley.gov.uk/waste/"
-URL = urljoin(URL, URL_code)
+URL = urljoin(URL, args.location_ID)
 
-page = requests.get(URL)
-
+try:
+    page = requests.get(URL)
+    page.raise_for_status()
+except requests.exceptions.HTTPError as e:
+    print(e)
+    sys.exit(1)
 
 soup = BeautifulSoup(page.content, 'html.parser')
 
