@@ -1,6 +1,6 @@
-'''Scrapes the collection dates of the various waste services
+desc = '''Scrapes the collection dates of the various waste services
    offered by Bromley Council. The required argument is the 
-   parameter taken after entering the address into
+   parameter taken from the URL after entering the address into
    https://recyclingservices.bromley.gov.uk/waste/'''
 
 
@@ -9,9 +9,6 @@ import argparse, requests, sys
 from bs4 import BeautifulSoup
 from requests.compat import urljoin
 
-desc = '''Scrapes the data from the Bromley Recycling Services council website,
- (https://recyclingservices.bromley.gov.uk/waste/), 
- the location ID is taken from the URL after the address has been entered.'''
 parser = argparse.ArgumentParser(description=desc)
 parser.add_argument('location_ID')
 args = parser.parse_args()
@@ -32,6 +29,20 @@ soup = BeautifulSoup(page.content, 'html.parser')
 address = soup.find('dd', 'waste__address__property').text
 print(address)
 
+def parse_list_value(data: str):
+    '''
+    The list__value may contain a message about a missed collection, alongside the
+    time and date. Format and return the data
+    '''
+    split = data.strip().split("\n              \n              \n              \n")
+
+    if len(split) == 1:
+        return { "Date": split[0] }
+    
+    if len(split) == 2:
+        return { "Date": split[0], "Message": split[1] }
+    
+    return None # Unexpected
 
 '''For each 'waste-service-name' follows a 'govuk-summary-list', consisting of
    multiple 'govuk-summary-list__row', each holding a 'govuk-summary-list__key'
@@ -61,7 +72,7 @@ for waste_service_name in waste_services_names:
     keys = summary.find_all('dt', class_='govuk-summary-list__key')
     values = summary.find_all('dd', class_='govuk-summary-list__value')
 
-    waste_services_dates[waste_service_name.text] = dict(zip([k.text for k in keys], [v.text.strip() for v in values]))
+    waste_services_dates[waste_service_name.text] = dict(zip([k.text for k in keys], [parse_list_value(v.text) for v in values]))
 
 
 # Example output
