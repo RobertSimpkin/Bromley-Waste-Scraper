@@ -3,7 +3,7 @@ desc = '''Scrapes the collection dates of the various waste services
    parameter taken from the URL after entering the address into
    https://recyclingservices.bromley.gov.uk/waste/'''
 
-import argparse, dateparser, datetime, requests, sys
+import argparse, dateparser, datetime, json, requests, sys
 
 from bs4 import BeautifulSoup
 from requests.compat import urljoin
@@ -71,7 +71,7 @@ def format_service_item(key, value) -> dict:
 waste_services = dict()
 waste_services['address'] = address
 waste_services['code'] = args.location_ID
-waste_services['scrape_datetime'] = datetime.datetime.now()
+#waste_services['scrape_datetime'] = datetime.datetime.now()
 waste_services['services'] = dict()
 
 waste_services_names = soup.find_all('h3', class_='waste-service-name')
@@ -97,3 +97,7 @@ for waste_service_name in waste_services_names:
 
 for service in waste_services['services']:
     print(waste_services['services'][service])
+
+# JSON Output
+with open('scraped_waste.json', 'w') as file:
+    file.write(json.dumps(waste_services, default=str))
