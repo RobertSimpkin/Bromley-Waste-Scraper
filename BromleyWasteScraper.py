@@ -53,7 +53,7 @@ class BromleyWasteScraper:
                 return {'last_collection': dateparser.parse(split_value[0]), 'message': split_value[1]}
 
 
-    def scrape(self) -> str:
+    def scrape(self) -> dict:
         '''Scrapes information and returns as JSON string'''
 
         try:
@@ -91,10 +91,10 @@ class BromleyWasteScraper:
                 item = self.__format_service_item(key, value)
                 self.waste_services['services'][service_name] |= item
 
-        return json.dumps(self.waste_services, default=str, indent=2)
+        return self.waste_services
 
 
-    def grab(self, update = False) -> str:
+    def grab(self, update = False) -> dict:
         '''Return JSON string without updating data'''
 
-        return json.dumps(self.waste_services, default=str, indent=2)
+        return self.waste_services
