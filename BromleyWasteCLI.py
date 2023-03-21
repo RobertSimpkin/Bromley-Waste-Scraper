@@ -12,8 +12,6 @@ def display_waste_data(url_code: str) -> None:
 
     scraper = BromleyWasteScraper(url_code)
     data = scraper.scrape()
-    
-    data = json.loads(data)
 
     print(f"{bold}Bromley Waste Services\n{data.get('address')}{end}\n")
 
