@@ -98,3 +98,11 @@ class BromleyWasteScraper:
         '''Return JSON string without updating data'''
 
         return self.waste_services
+
+
+    def __str__(self) -> str:
+        try:
+            return f'{self.url_code} @ {self.address}'
+        except AttributeError:
+            # If scrape hasn't been called, address won't be initialized
+            return f'{self.url_code}'
