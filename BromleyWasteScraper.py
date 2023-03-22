@@ -18,7 +18,7 @@ class BromleyWasteScraper:
         self.url_code = url_code
         self.url = urljoin('https://recyclingservices.bromley.gov.uk/waste/', url_code)
 
-        self.waste_services = dict()
+        self.waste_services = {}
 
 
     def __format_service_names(self, name: str) -> str:
@@ -44,7 +44,7 @@ class BromleyWasteScraper:
         if 'Frequency' == key.text:
             return {'frequency': value.text.strip()}
         if 'Next collection' == key.text:
-            return {'next_collection': dateparser.parse(value.text.strip())}
+            return {'next_collection': dateparser.parse(value.text.strip()).date()}
         if 'Last collection' == key.text:
             split_value = value.text.strip().split('\n              \n              \n              \n')
             if len(split_value) == 1:
@@ -60,6 +60,7 @@ class BromleyWasteScraper:
             page = requests.get(self.url)
             page.raise_for_status()
         except Exception as e:
+            #HTTPError
             logging.exception(e)
             return None
 
@@ -70,7 +71,7 @@ class BromleyWasteScraper:
         self.waste_services['address'] = self.address
         self.waste_services['url_code'] = self.url_code
         self.waste_services['created_at'] = datetime.datetime.now()
-        self.waste_services['services'] = dict()
+        self.waste_services['services'] = {}
 
         waste_service_names = soup.find_all('h3', class_='waste-service-name')
         for waste_service_name in waste_service_names:
