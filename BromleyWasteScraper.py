@@ -44,11 +44,16 @@ class BromleyWasteScraper:
         if 'Frequency' == key.text:
             return {'frequency': value.text.strip()}
         if 'Next collection' == key.text:
+            if '(In progress)' in value.text:
+                # It's collection day!
+                return {'next_collection': datetime.datetime.now().date()}
+
             return {'next_collection': dateparser.parse(value.text.strip()).date()}
         if 'Last collection' == key.text:
             split_value = value.text.strip().split('\n              \n              \n              \n')
             if len(split_value) == 1:
                 return {'last_collection': dateparser.parse(split_value[0])}
+            # Handle messages about missed collections
             if len(split_value) == 2:
                 return {'last_collection': dateparser.parse(split_value[0]), 'message': split_value[1]}
 

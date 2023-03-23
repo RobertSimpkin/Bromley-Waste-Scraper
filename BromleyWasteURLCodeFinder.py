@@ -3,7 +3,7 @@ import re
 
 class BromleyWasteURLCodeFinder:
 
-    def search(postcode = None) -> str:
+    def search(postcode: str = None) -> str:
         ''''''
 
         br = mechanize.Browser()
