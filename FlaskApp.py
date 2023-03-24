@@ -33,3 +33,6 @@ def return_json(url_code: str):
     scrapers[url_code] = BromleyWasteScraper(url_code)
     # TODO: Error handling
     return scrapers[url_code].scrape()
+
+if (__name__ == '__main__'):
+    app.run(debug=True)
