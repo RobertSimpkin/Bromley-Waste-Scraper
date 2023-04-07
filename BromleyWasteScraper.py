@@ -23,6 +23,7 @@ class BromleyWasteScraper:
 
     def __format_service_names(self, name: str) -> str:
         ''''''
+        name = name.strip()
 
         if 'Food Waste' == name:
             return 'food_waste'
@@ -47,6 +48,10 @@ class BromleyWasteScraper:
             if '(In progress)' in value.text:
                 # It's collection day!
                 return {'next_collection': datetime.datetime.now().date()}
+            
+            if '(this collection has been adjusted from its usual time)' in value.text:
+                date = value.text.strip().split('\n')[0]
+                return {'next_collection': dateparser.parse(date)}
 
             return {'next_collection': dateparser.parse(value.text.strip()).date()}
         if 'Last collection' == key.text:
@@ -91,7 +96,7 @@ class BromleyWasteScraper:
             values = summary.find_all('dd', class_='govuk-summary-list__value')
 
             service_name = self.__format_service_names(waste_service_name.text)
-            self.waste_services['services'][service_name] = { 'name': waste_service_name.text }
+            self.waste_services['services'][service_name] = { 'name': waste_service_name.text.strip() }
 
             for key, value in zip(keys, values):
                 item = self.__format_service_item(key, value)
