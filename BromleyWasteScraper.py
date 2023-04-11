@@ -44,6 +44,7 @@ class BromleyWasteScraper:
 
         if 'Frequency' == key.text:
             return {'frequency': value.text.strip()}
+        
         if 'Next collection' == key.text:
             if '(In progress)' in value.text:
                 # It's collection day!
@@ -51,16 +52,22 @@ class BromleyWasteScraper:
             
             if '(this collection has been adjusted from its usual time)' in value.text:
                 date = value.text.strip().split('\n')[0]
-                return {'next_collection': dateparser.parse(date)}
+                return {'next_collection': dateparser.parse(date).date()}
 
             return {'next_collection': dateparser.parse(value.text.strip()).date()}
+        
         if 'Last collection' == key.text:
-            split_value = value.text.strip().split('\n              \n              \n              \n')
+            # Strip unnecessary white space from HTML scrape
+            split_value = [ x for x in [ x.strip() for x in value.text.split('\n') ] if x ]
+
             if len(split_value) == 1:
                 return {'last_collection': dateparser.parse(split_value[0])}
             # Handle messages about missed collections
             if len(split_value) == 2:
-                return {'last_collection': dateparser.parse(split_value[0]), 'message': split_value[1]}
+                return {'last_collection': dateparser.parse(split_value[0]), 'message': split_value[1].split('  ')[0]}
+            # Handle message about missed collections & adjusted timetable
+            if len(split_value) == 3:
+                return {'last_collection': dateparser.parse(split_value[0]), 'message': split_value[2].split('  ')[0]}
 
 
     def scrape(self) -> dict:
